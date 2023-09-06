@@ -42,4 +42,11 @@
         </div>
     </div>
 </body>
+<script>
+    window.onload = function () {
+        if(location.href.includes("fail")) {
+            alert("로그인에 실패하였습니다. 다시 시도해주세요.")
+        }
+    }
+</script>
 </html>
