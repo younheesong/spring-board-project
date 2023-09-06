@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <html>
+
 <head>
 
 </head>
@@ -14,7 +16,18 @@
         </div>
 
         <div class="flex flex-1 justify-end">
-            <a href="/users/login" class="text-sm font-semibold leading-6 text-gray-900">Log in <span aria-hidden="true">&rarr;</span></a>
+            <sec:authorize access="isAnonymous()">
+                <a href="/users/login" class="text-sm font-semibold leading-6 text-gray-900">Log in <span aria-hidden="true">&rarr;</span></a>
+            </sec:authorize>
+
+            <sec:authorize access="hasRole('ADMIN')">
+                관리자 페이지
+            </sec:authorize>
+
+            <sec:authorize access="isAuthenticated()">
+                <sec:authentication property="principal.username" />님
+                <a href="/users/logout" class="text-sm font-semibold leading-6 ml-4 text-gray-900">로그아웃</a>
+            </sec:authorize>
         </div>
     </nav>
 </header>
