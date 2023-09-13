@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 10MB
   mvc:
     view:
       prefix: /WEB-INF/views/
@@ -10,12 +14,17 @@ spring:
     password: rosie1234
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
 logging.level:
   org.hibernate.SQL: debug
+
+file:
+  dir: C:/Users/thd65/java/commnuity/src/main/resources/static/upload-files/
+
+
 # org.hibernate.type: trace #스프링 부트 2.x, hibernate5
 # org.hibernate.orm.jdbc.bind: trace #스프링 부트 3.x, hibernate
 
