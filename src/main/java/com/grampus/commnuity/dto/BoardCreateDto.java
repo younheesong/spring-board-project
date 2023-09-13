@@ -1,0 +1,34 @@
+package com.grampus.commnuity.dto;
+
+import com.grampus.commnuity.domain.Board;
+import com.grampus.commnuity.domain.Category;
+import com.grampus.commnuity.domain.User;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+public class BoardCreateDto {
+    private String category;
+    private String title;
+    private String content;
+    private List<MultipartFile> files;
+
+    // dto -> entity
+    public Board toEntity(User user){
+        return Board.builder()
+                .user(user)
+                .category(Category.of(category))
+                .creationDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .title(title)
+                .content(content)
+                .likesCount(0)
+                .viewsCount(0)
+                .build();
+
+    }
+
+}
