@@ -1,13 +1,15 @@
 package com.grampus.commnuity.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter @Setter
 @Table(name = "likes")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Like {
     @Id @GeneratedValue
     @Column(name="like_id")

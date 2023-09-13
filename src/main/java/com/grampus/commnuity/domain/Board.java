@@ -1,17 +1,17 @@
 package com.grampus.commnuity.domain;
 
 import com.grampus.commnuity.dto.BoardDto;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Board {
     @Id @GeneratedValue
@@ -32,14 +32,22 @@ public class Board {
     private String content; // 내용
 
     @OneToMany(mappedBy = "board")
-    private List<Like> likes; // 좋아요 목록
+    private List<Like> likes = new ArrayList<>(); // 좋아요 목록
     private Integer likesCount; // 좋아요수
     private Integer viewsCount; // 조회수
 
+    @OneToMany(mappedBy = "board")
+    private List<File> files;
+
+
+
     public void update(BoardDto boardDto){
-        this.category = boardDto.getCategory();
+        if(boardDto.getCategory()!=null){
+            this.category = boardDto.getCategory();
+        }
         this.title= boardDto.getTitle();
         this.content = boardDto.getContent();
+        this.modifiedDate = LocalDateTime.now();
     }
 
     public void changeLikesCount(Integer likesCount){
