@@ -12,11 +12,16 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
-    Page<Board> findAllByCategory(Category category, PageRequest pageRequest); // 카테고리에 맞게 페이지 조회
-    Page<Board> findAllByCategoryAndTitleContains(Category category, String title, PageRequest pageRequest); // 카테고리에 맞게, 타이틀이 포함된 검색 결과 페이지 조회
+    /*카테고리 별 페이지 조회*/
+    Page<Board> findAllByCategory(Category category, PageRequest pageRequest);
 
-    List<Board> findAllByUserLoginId(String loginId); // 해당 유저가 작성한 글 조회
+    /* 카테고리 별 타이틀이 포함된 검색 결과 페이지 조회*/
+    Page<Board> findAllByCategoryAndTitleContains(Category category, String title, PageRequest pageRequest);
 
+    /* 해당 유저가 작성한 글 조회 */
+    List<Board> findAllByUserLoginId(String loginId);
+
+    /* 조회수 증가 */
     @Modifying
     @Query("update Board b set b.viewsCount = b.viewsCount +1 where b.id = :id")
     int updateViewsCount(@Param("id")Long id);

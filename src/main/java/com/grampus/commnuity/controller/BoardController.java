@@ -48,6 +48,7 @@ public class BoardController {
 
 
         model.addAttribute("category", boardCategory);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("boards", boardService.getBoardList(boardCategory, pageRequest, keyword).toList());
         model.addAttribute("currentPage", boardService.getBoardList(boardCategory, pageRequest, keyword).getNumber());
         model.addAttribute("totalPage", boardService.getBoardList(boardCategory, pageRequest, keyword).getTotalPages());
