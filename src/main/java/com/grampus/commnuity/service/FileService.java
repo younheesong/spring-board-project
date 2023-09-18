@@ -26,9 +26,6 @@ public class FileService {
 
     private final FileRepository fileRepository;
 
-//    private final String rootPath = System.getProperty("user.dir");
-//    private final String fileDir = rootPath + "/src/main/resources/static/upload-files/";
-
     public String getFullPath(String filename){
         return fileDir +filename;
     }
@@ -43,6 +40,7 @@ public class FileService {
         return storeFileResults;
     }
     // 단일 파일 저장
+    @Transactional
     public File saveFile(MultipartFile file, Board board){
         if(file.isEmpty()){
             return null;
@@ -81,11 +79,14 @@ public class FileService {
 
     // 이미지 삭제
     @Transactional
+    public void deleteFiles(List<File> files) throws IOException {
+        for (File file: files){
+            deleteFile(file);
+        }
+    }
+    @Transactional
     public void deleteFile(File file) throws IOException {
         fileRepository.delete(file);
         Files.deleteIfExists(Paths.get(getFullPath(file.getSavedFileName())));
     }
-
-
-
 }
