@@ -18,7 +18,7 @@ public class Like {
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="user_id")
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
