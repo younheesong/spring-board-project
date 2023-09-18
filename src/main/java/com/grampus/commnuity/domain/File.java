@@ -4,6 +4,7 @@ package com.grampus.commnuity.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter @Setter
@@ -11,15 +12,19 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class File {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="file_id")
     private Long id;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="board_id")
+    @NotNull
     private Board board;
 
+    @NotNull
     private String originalFileName;
+
+    @NotNull
     private String savedFileName;
 }
