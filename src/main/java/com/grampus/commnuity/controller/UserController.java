@@ -1,11 +1,17 @@
 package com.grampus.commnuity.controller;
 
+import com.grampus.commnuity.domain.Board;
 import com.grampus.commnuity.dto.UserJoinDto;
+import com.grampus.commnuity.service.BoardService;
 import com.grampus.commnuity.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
+    private final BoardService boardService;
     private final UserService userService;
 
     @GetMapping("/join")
@@ -49,6 +56,22 @@ public class UserController {
         }
         return "/users/login";
     }
+
+    @GetMapping("/boards")
+    public String userBoardsPage(Model model,
+                                 @RequestParam(required = false, defaultValue = "1") int page,
+                                 Authentication auth){
+
+        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by("creationDate").descending());
+        Page<Board> myBoardList = boardService.getMyBoardList(auth.getName(), pageRequest);
+
+        model.addAttribute("boards", myBoardList.toList());
+        model.addAttribute("currentPage", myBoardList.getNumber());
+        model.addAttribute("totalPage", myBoardList.getTotalPages());
+        return "/users/boards";
+    }
+
+
 
 
 }
