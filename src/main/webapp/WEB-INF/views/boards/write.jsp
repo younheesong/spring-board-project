@@ -31,7 +31,7 @@
             <div class="col-span-full">
                 <label for="title" class="block text-sm font-medium leading-6 text-gray-900">제목</label>
                 <div class="mt-2">
-                    <input type="text" name="title" id="title" value="${title}"
+                    <input type="text" name="title" id="title" value="${board.title}"
                            class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                 </div>
             </div>
@@ -40,7 +40,7 @@
                 <label for="content" class="block text-sm font-medium leading-6 text-gray-900">내용</label>
                 <div class="mt-2">
                     <textarea id="content" name="content" rows="3"
-                              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">${content}</textarea>
+                              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">${board.content}</textarea>
                 </div>
             </div>
 
@@ -48,8 +48,8 @@
                 <label class="block text-sm font-medium leading-6 text-gray-900 mb-5">첨부파일</label>
                 <div class="flex gap-2 items-center">
                     <ul id="fileList" class="flex gap-2 flex-wrap">
-                        <c:if test="${!empty files}">
-                            <c:forEach items="${files}" var="file">
+                        <c:if test="${!empty board.files}">
+                            <c:forEach items="${board.files}" var="file">
                                 <label class="relative block w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
@@ -76,7 +76,7 @@
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
                             </svg>
-                            <input id="fileInput1" name=${type=='write'?'files': 'newFiles'} type="file" class="sr-only"
+                            <input id="fileInput1" name=${type == 'write'?'files': 'newFiles'} type="file" class="sr-only"
                                    onchange="updatePreview(1)">
                             <img id="fileImage1"/>
 
@@ -121,7 +121,7 @@
     window.addEventListener('DOMContentLoaded', function(){
         // 초기 카테고리 설정
         if('${category}') {
-            $("#category").val(${category}).prop("selected", true);
+            $("#category").val('${category}').prop("selected", true);
         }
         // 첨부파일 delete button click 액션 지정
         $("svg[name='file-delete']").on("click", function (e) {
@@ -133,17 +133,21 @@
 
     let fileIdx = 1;
     const addFile = () => {
-        console.log('add')
+        if($("#fileList").children().length >=10){
+            alert("최대 10개까지 등록 가능합니다.")
+            return;
+        }
         fileIdx++;
         const inputId = "fileInput" + fileIdx;
         const imgId = "fileImage" + fileIdx;
-        console.log(imgId);
+        const inputName = '${type}' == 'write'?'files': 'newFiles'
+
         const str = '<label for=' + inputId + ' class="relative block w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"> ' +
             '<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"> ' +
             '<path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/> ' +
             '</svg> ' +
             '<input id=' + inputId +
-            ' name="files" type="file" class="sr-only" onchange="updatePreview(\'' + fileIdx + '\')"/>' +
+            ' name='+ inputName + ' type="file" class="sr-only" onchange="updatePreview(\'' + fileIdx + '\')"/>' +
             '<img id=' + imgId + ' class="" /> ' +
             '<svg class="absolute z-50 top-0 right-0" name="file-delete" width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> ' +
             '<path d="M12 21C10.8181 21 9.64778 20.7672 8.55585 20.3149C7.46392 19.8626 6.47177 19.1997 5.63604 18.364C4.80031 17.5282 4.13738 16.5361 3.68508 15.4442C3.23279 14.3522 3 13.1819 3 12C3 10.8181 3.23279 9.64778 3.68508 8.55585C4.13738 7.46392 4.80031 6.47177 5.63604 5.63604C6.47177 4.80031 7.46392 4.13738 8.55585 3.68508C9.64778 3.23279 10.8181 3 12 3C13.1819 3 14.3522 3.23279 15.4442 3.68508C16.5361 4.13738 17.5282 4.80031 18.364 5.63604C19.1997 6.47177 19.8626 7.46392 20.3149 8.55585C20.7672 9.64778 21 10.8181 21 12C21 13.1819 20.7672 14.3522 20.3149 15.4442C19.8626 16.5361 19.1997 17.5282 18.364 18.364C17.5282 19.1997 16.5361 19.8626 15.4441 20.3149C14.3522 20.7672 13.1819 21 12 21L12 21Z" stroke="#33363F" stroke-width="2" stroke-linecap="round"/> ' +
@@ -160,10 +164,6 @@
     }
 
     const updatePreview = (number) => {
-        console.log(number);
-
-        console.log(document.getElementById("fileInput" + number))
-
         const file = document.getElementById("fileInput" + number)?.files[0];
         const maxSize = 1024 * 1024; //1MB
         const ext = document.getElementById("fileInput" + number).value.split(".").pop().toLowerCase();
@@ -183,14 +183,10 @@
             alert("파일 용량 1MB를 초과하였습니다.");
             document.getElementById("fileInput" + number).value = '';
             return;
-        } else {
-            console.log("용량 통과")
         }
 
         if (file) {
             let reader = new FileReader();
-            console.log(file)
-            console.log("fileImage" + number)
 
             reader.readAsDataURL(file);
             reader.onload = function () {

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 
 <head>
@@ -24,8 +25,10 @@
                 관리자 페이지
             </sec:authorize>
 
-            <sec:authorize access="isAuthenticated()">
-                <sec:authentication property="principal.username" />님
+            <sec:authorize access="isAuthenticated()" >
+                <a href="/users/boards" class="hover:border-b">
+                마이페이지
+                </a>
                 <a href="/users/logout" class="text-sm font-semibold leading-6 ml-4 text-gray-900">로그아웃</a>
             </sec:authorize>
         </div>

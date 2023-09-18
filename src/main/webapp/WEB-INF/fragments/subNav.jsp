@@ -29,7 +29,6 @@
     window.addEventListener('DOMContentLoaded', function(){
         const categories = ['java', 'javascript', 'spring', 'react']
         const pathArray = window.location.pathname.split("/")
-        console.log(pathArray)
         const category = pathArray[2];
 
         if(category && categories.includes(category)){

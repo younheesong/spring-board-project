@@ -1,6 +1,7 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <html>
 <head>
     <title>홈</title>
@@ -11,13 +12,15 @@
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-20">
 
     <h2 class="text-center text-3xl font-bold mb-16">✏️게시글✏️</h2>
-    <div class="flex justify-end mb-5">
-        <button type="button" onclick="gotoWrite()"
-                class="rounded-md bg-indigo-50 px-5 py-2 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100">
+    <sec:authorize access="isAuthenticated()">
+        <div class="flex justify-end mb-5">
+            <button type="button" onclick="gotoWrite()"
+                    class="rounded-md bg-indigo-50 px-5 py-2 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100">
 
-            글 생성
-        </button>
-    </div>
+                글 생성
+            </button>
+        </div>
+    </sec:authorize>
     <div class="flex flex-row justify-center gap-10">
 
         <jsp:include page="../../fragments/subNav.jsp"></jsp:include>
@@ -30,7 +33,7 @@
                        class="rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                 <button type="button" onclick="search()"
                         class="rounded-md px-5 py-2 border text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100">
-                   검색
+                    검색
                 </button>
             </div>
             <div class="h-[600px]">
@@ -80,17 +83,7 @@
 </div>
 </body>
 <script>
-    const gotoWrite = () => {
-        window.location.href = '/boards/write'
-    }
-    const gotoDetail = (id) => {
-        const category = "${category}"
-        window.location.href = '/boards/' + category.toString().toLowerCase() + '/' + id;
-    }
-
     window.onload = function () {
-        console.log(${currentPage});
-        console.log(${totalPage});
         let nowPage = ${currentPage} +1;    // 현재 페이지
         let totalPage = ${totalPage};  // 전체 페이지 수
 
@@ -140,21 +133,29 @@
         $("#paging").html(pageHtml);
     }
 
-    function search (){
+    const gotoWrite = () => {
+        window.location.href = '/boards/write'
+    }
+    const gotoDetail = (id) => {
         const category = "${category}"
-        const keyword = $('#keyword').val();
-        location.href="/boards/" + category.toString().toLowerCase() + "?keyword="+keyword
+        window.location.href = '/boards/' + category.toString().toLowerCase() + '/' + id;
     }
 
-    function makeUrl(page) {
+    const search = () => {
         const category = "${category}"
-        let url= "/boards/" + category.toString().toLowerCase() + "?page=" + page;
+        const keyword = $('#keyword').val();
+        location.href = "/boards/" + category.toString().toLowerCase() + "?keyword=" + keyword
+    }
+
+    const makeUrl = (page) => {
+        const category = "${category}"
+        let url = "/boards/" + category.toString().toLowerCase() + "?page=" + page;
 
         const urlParams = new URL(location.href).searchParams;
         const keyword = urlParams.get("keyword");
 
-        if(keyword){
-            url += "&keyword="+keyword;
+        if (keyword) {
+            url += "&keyword=" + keyword;
         }
 
         return url;
