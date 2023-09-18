@@ -33,7 +33,7 @@ public class BoardController {
     private final BoardService boardService;
     private final LikeService likeService;
 
-    // 게시글 조회(페이징)
+    /* 게시글 조회(페이징, 키워드 처리) */
     @GetMapping("/{category}")
     public String getBoardListPage(@PathVariable String category,
                                Model model,
@@ -45,19 +45,18 @@ public class BoardController {
 
         Category boardCategory = Category.of(category);
         PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by("creationDate").descending());
-
+        Page<Board> boardList = boardService.getBoardList(boardCategory, pageRequest, keyword);
 
         model.addAttribute("category", boardCategory);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("boards", boardService.getBoardList(boardCategory, pageRequest, keyword).toList());
-        model.addAttribute("currentPage", boardService.getBoardList(boardCategory, pageRequest, keyword).getNumber());
-        model.addAttribute("totalPage", boardService.getBoardList(boardCategory, pageRequest, keyword).getTotalPages());
-
+        model.addAttribute("boards", boardList.toList());
+        model.addAttribute("currentPage", boardList.getNumber());
+        model.addAttribute("totalPage", boardList.getTotalPages());
 
         return "boards/list";
     }
 
-    // 상세 게시글 조회
+    /* 상세 게시글 조회 */
     @GetMapping("/{category}/{boardId}")
     public String getBoardDetailPage(@PathVariable String category, @PathVariable Long boardId, Model model, Authentication auth, @CookieValue(value="boardView", required = false) Cookie cookie, HttpServletResponse response){
         log.info("category: "+ category);
@@ -70,12 +69,13 @@ public class BoardController {
 
         model.addAttribute("board", boardDto);
 
+        /* 좋아요 체크 여부 확인 로직 */
         if(auth!=null){
             boolean liked = likeService.isLiked(auth.getName(), boardId);
             model.addAttribute("boardLiked", liked);
         }
 
-        /* 조회수 로직 */
+        /* 조회수 증가 로직 */
         Cookie oldCookie = cookie;
 
         if(oldCookie !=null){
@@ -97,14 +97,15 @@ public class BoardController {
         return "boards/detail";
     }
 
-    // 게시글 생성 페이지
+    /* 게시글 생성 페이지 */
     @GetMapping("/write")
     public String writeBoardPage(Model model){
         model.addAttribute("type", "write");
+        model.addAttribute("board", new BoardCreateDto());
         return "boards/write";
     }
 
-    // 게시글 생성
+    /* 게시글 생성 */
     @PostMapping("/write")
     public String createBoard(BoardCreateDto boardCreateDto, Authentication auth){
         log.info("boardCreateDto.category: "+boardCreateDto.getCategory());
@@ -114,21 +115,20 @@ public class BoardController {
 
         boardService.writeBoard(boardCreateDto, auth.getName());
 
-        return "redirect:/boards/java";
+        return "redirect:/boards/"+boardCreateDto.getCategory().toLowerCase();
     }
 
+    /* 게시글 수정 페이지 */
     @GetMapping("/{category}/{boardId}/edit")
     public String editBoardPage(@PathVariable Long boardId, Model model){
         BoardDto boardDto = boardService.getBoard(boardId);
+
         model.addAttribute("type", "edit");
-        model.addAttribute("category", boardDto.getCategory());
-        model.addAttribute("title", boardDto.getTitle());
-        model.addAttribute("content", boardDto.getContent());
-        model.addAttribute("files", boardDto.getFiles());
+        model.addAttribute("board", boardDto);
         return "boards/write";
     }
 
-    // 게시글 수정
+    /* 게시글 수정 */
     @PostMapping("/{category}/{boardId}/edit")
     public String editBoard(@PathVariable Long boardId, @PathVariable String category, BoardDto boardDto) throws IOException {
         log.info("boardId: "+ boardId);
@@ -138,9 +138,9 @@ public class BoardController {
         return "redirect:/boards/"+category+"/"+boardId;
     }
 
-    // 게시글 삭제
+    /* 게시글 삭제 */
     @GetMapping ("/{category}/{boardId}/delete")
-    public String deleteBoard(@PathVariable Long boardId, @PathVariable Category category){
+    public String deleteBoard(@PathVariable Long boardId, @PathVariable Category category) throws IOException {
         log.info("boardId: "+boardId);
 
         boardService.deleteBoard(boardId);
@@ -148,8 +148,6 @@ public class BoardController {
         return "redirect:/boards/"+category;
 
     }
-
-
 
 
 }

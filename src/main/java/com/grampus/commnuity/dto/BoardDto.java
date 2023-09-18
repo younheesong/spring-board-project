@@ -26,8 +26,8 @@ public class BoardDto {
     private LocalDateTime creationDate;
     private LocalDateTime modifiedDate;
     private List<File> files;
-    private List<MultipartFile> newFiles;
-    private List<Long> oldFiles;
+    private List<MultipartFile> newFiles; // 수정 시, 추가된 파일
+    private List<Long> oldFiles; // 수정 시, 기존에 있던 파일
 
 
     // entity -> dto

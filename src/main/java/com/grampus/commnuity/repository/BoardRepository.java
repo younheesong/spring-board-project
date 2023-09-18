@@ -8,9 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
     /*카테고리 별 페이지 조회*/
     Page<Board> findAllByCategory(Category category, PageRequest pageRequest);
@@ -19,7 +21,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     Page<Board> findAllByCategoryAndTitleContains(Category category, String title, PageRequest pageRequest);
 
     /* 해당 유저가 작성한 글 조회 */
-    List<Board> findAllByUserLoginId(String loginId);
+    Page<Board> findAllByUserLoginId(String loginId, PageRequest pageRequest);
 
     /* 조회수 증가 */
     @Modifying

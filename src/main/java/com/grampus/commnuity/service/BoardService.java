@@ -44,6 +44,8 @@ public class BoardService {
         if(otpBoard.isEmpty()){
             return null;
         }
+        log.info("---");
+        log.info(otpBoard.get().getFiles().toString());
         return BoardDto.of(otpBoard.get());
     }
 
@@ -53,11 +55,10 @@ public class BoardService {
         User user = userRepository.findByLoginId(loginId).get();
         // board 저장
         Board savedBoard = boardRepository.save(boardCreateDto.toEntity(user));
-        // 파일 있으면, 저장
+        // 파일 있으면, 파일 repo에 따로 저장
         if(!boardCreateDto.getFiles().isEmpty()){
             List<MultipartFile> files = boardCreateDto.getFiles();
-            List<File> savedFiles = fileService.saveFiles(files, savedBoard);
-            savedBoard.setFiles(savedFiles);
+            fileService.saveFiles(files, savedBoard);
         }
         return savedBoard.getId();
     }
@@ -71,17 +72,14 @@ public class BoardService {
        }
 
        Board board = optBoard.get();
-       log.info("board : "+ board);
        board.update(boardDto);
 
-       // 게시글 이미지 처리
+       /* 게시글 이미지 처리 로직 */
 
        // 이전 이미지를 삭제한 경우 해당 이미지 삭제
        if(!board.getFiles().isEmpty()) {
            for (File oldFile : board.getFiles()) {
-               if(boardDto.getOldFiles()==null){
-                   fileService.deleteFile(oldFile);
-               } else if (!boardDto.getOldFiles().contains(oldFile.getId())) {
+               if(boardDto.getOldFiles()==null || !boardDto.getOldFiles().contains(oldFile.getId())){
                    fileService.deleteFile(oldFile);
                }
            }
@@ -91,28 +89,31 @@ public class BoardService {
        if(!boardDto.getNewFiles().isEmpty()){
            List<MultipartFile> newFiles = boardDto.getNewFiles();
            List<File> savedFiles = fileService.saveFiles(newFiles, board);
-           board.getFiles().addAll(savedFiles);
+//           board.getFiles().addAll(savedFiles);
        }
 
        return boardId;
    }
 
     // 글 삭제
-    public Long deleteBoard(Long boardId){
+    public Long deleteBoard(Long boardId) throws IOException {
         Optional<Board> optBoard = boardRepository.findById(boardId);
 
         if(optBoard.isEmpty()){
             return null;
         }
         // 이미지 삭제 처리
-
+        Board board = optBoard.get();
+        if(board.getFiles() != null){
+            fileService.deleteFiles(board.getFiles());
+        }
         boardRepository.deleteById(boardId);
         return boardId;
     }
 
     // 자신이 작성한 글 조회
-    public List<Board> getMyBoardList(String loginId){
-        return boardRepository.findAllByUserLoginId(loginId);
+    public Page<Board> getMyBoardList(String loginId, PageRequest pageRequest){
+        return boardRepository.findAllByUserLoginId(loginId, pageRequest);
     }
 
 
