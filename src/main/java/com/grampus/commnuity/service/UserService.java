@@ -18,7 +18,8 @@ public class UserService {
 
     @Transactional
     public void join(UserJoinDto userJoinDto){
-        userRepository.save(userJoinDto.toEntity( encoder.encode(userJoinDto.getPassword())));
+        String encodedPassword = encoder.encode(userJoinDto.getPassword());
+        userRepository.save(userJoinDto.toEntity(encodedPassword));
     }
 
     public boolean existsDuplicatedUser(UserJoinDto userJoinDto){
