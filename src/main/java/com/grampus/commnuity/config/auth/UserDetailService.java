@@ -10,15 +10,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class UserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
-
+    // db에서 회원정보를 가져오는 역할.
     @Override
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-        log.info(loginId);
-
         User user = userRepository.findByLoginId(loginId).orElseThrow(()-> {
             return new UsernameNotFoundException("해당 유저를 찾을 수 없습니다.");
         });
