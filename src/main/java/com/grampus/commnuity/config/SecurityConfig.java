@@ -6,12 +6,8 @@ import com.grampus.commnuity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -30,12 +26,13 @@ public class SecurityConfig  {
     private static final String[] anonymousUserUrl = {"/users/login", "/users/join"};
 
     // 로그인한 유저들만 접근 가능한 URL
-    private static final String[] authenticatedUserUrl = {"/boards/**/**/edit", "/boards/**/**/delete", "/likes/**", "/users/myPage/**", "/users/edit", "/users/delete"};
+    private static final String[] authenticatedUserUrl = {"/boards/write","/boards/**/**/edit", "/boards/**/**/delete", "/likes/**", "/users/boards/**", "/users/edit", "/users/delete"};
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf().disable()
                 .cors().and()
+                // url 별 권한 처리
                 .authorizeRequests()
                 .antMatchers(anonymousUserUrl).anonymous()
                 .antMatchers(authenticatedUserUrl).authenticated()
