@@ -18,9 +18,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 logging.level:
   org.hibernate.SQL: debug
-
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
 file:
   dir: C:/Users/thd65/java/commnuity/src/main/resources/static/upload-files/
 

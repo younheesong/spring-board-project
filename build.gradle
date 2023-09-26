@@ -30,7 +30,9 @@ dependencies {
 	implementation 'javax.servlet:jstl'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.security:spring-security-taglibs'
-	testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'org.jetbrains:annotations:24.0.0'
+    testImplementation 'org.springframework.security:spring-security-test'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
