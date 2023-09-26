@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 @Service
 @Transactional(readOnly = true)
@@ -19,14 +17,14 @@ public class UserService {
     @Transactional
     public void join(UserJoinDto userJoinDto){
         String encodedPassword = encoder.encode(userJoinDto.getPassword());
-        userRepository.save(userJoinDto.toEntity(encodedPassword));
+        userRepository.saveUser(userJoinDto.toEntity(encodedPassword));
     }
 
     public boolean existsDuplicatedUser(UserJoinDto userJoinDto){
         // 아이디 중복 체크
-        if(userRepository.existsByLoginId(userJoinDto.getLoginId())){
-            return true;
+        if(userRepository.findByLoginId(userJoinDto.getLoginId()).isEmpty()){
+            return false;
         }
-        return false;
+        return true;
     }
 }
