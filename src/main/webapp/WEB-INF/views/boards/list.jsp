@@ -53,7 +53,7 @@
                         <c:forEach items="${boards}" var="board">
                             <tr onclick="gotoDetail(${board.id})" class="hover:cursor-pointer">
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${board.title}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">${board.user.getUsername()}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">${board.username}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
                                     <fmt:parseDate value="${board.creationDate}" pattern="yyyy-MM-dd'T'HH:mm"
                                                    var="parsedDateTime" type="both"/>
@@ -84,7 +84,7 @@
 </body>
 <script>
     window.onload = function () {
-        let nowPage = ${currentPage} +1;    // 현재 페이지
+        let nowPage = ${currentPage};    // 현재 페이지
         let totalPage = ${totalPage};  // 전체 페이지 수
 
         let firstPage;  // 화면에 출력될 첫 페이지

@@ -65,7 +65,7 @@
 </body>
 <script>
     window.onload = function () {
-        let nowPage = ${currentPage} +1;    // 현재 페이지
+        let nowPage = ${currentPage};    // 현재 페이지
         let totalPage = ${totalPage};  // 전체 페이지 수
 
         let firstPage;  // 화면에 출력될 첫 페이지

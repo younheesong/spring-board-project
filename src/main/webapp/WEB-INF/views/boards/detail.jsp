@@ -72,8 +72,14 @@
             </div>
         </div>
         <div class="col-span-full">
-            <c:forEach items="${board.files}" var="file">
-                <img src="/images/${file.getSavedFileName()}" class="w-56 h-56"/>
+            <label class="block text-sm font-medium leading-6 text-gray-900 mb-5">첨부파일</label>
+            <c:forEach items="${files}" var="file">
+                <div>
+                    파일:
+                    <a target="_blank" class="font-bold" href="/files/${file.getSavedFileName()}">
+                            ${file.getOriginalFileName()}
+                    </a>
+                </div>
             </c:forEach>
         </div>
 
@@ -121,7 +127,7 @@
     let liked = false;
     let likesCount = parseInt(${board.likesCount})
     window.addEventListener('DOMContentLoaded', function () {
-        if ("${boardLiked}" =='true') {
+        if ("${boardLiked}" == 'true') {
             liked = true;
             $("#likeButton").css('fill', 'black');
         }
@@ -159,7 +165,7 @@
 
     const deleteBoard = () => {
         if (confirm("해당 글을 삭제하시겠습니까?") == true) {
-            location.href = "/boards/" + "${board.category}" +"/" + ${board.id} +"/delete";
+            location.href = "/boards/" + "${board.category}" + "/" + ${board.id} +"/delete";
         }
     }
 
