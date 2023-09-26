@@ -102,12 +102,8 @@ public class BoardService {
             Arrays.stream(oldContentImagesNames)
                     .filter(oldContentImage -> !newContentImageNames.contains(oldContentImage))
                     .forEach((removedImage) -> {
-                        try {
-                            log.info("removed Image: " + removedImage);
-                            fileService.deleteFile(removedImage);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        log.info("removed Image: " + removedImage);
+                        fileService.deleteFile(removedImage);
                     });
         }
 
