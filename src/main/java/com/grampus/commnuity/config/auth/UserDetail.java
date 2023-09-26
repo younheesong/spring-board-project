@@ -1,18 +1,26 @@
 package com.grampus.commnuity.config.auth;
 
 import com.grampus.commnuity.domain.User;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Getter
+@Setter
 public class UserDetail implements UserDetails {
     private User user;
+
+
+
 
     public UserDetail(User user) {
         this.user = user;
     }
+
 
     // 계정이 가지고 있는 권한 목록 return
     @Override
@@ -22,6 +30,9 @@ public class UserDetail implements UserDetails {
             return user.getRole().toString();
         });
         return collection;
+    }
+    public Long getId(){
+        return user.getId();
     }
 
     @Override
