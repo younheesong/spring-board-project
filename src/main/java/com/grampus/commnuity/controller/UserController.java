@@ -1,14 +1,13 @@
 package com.grampus.commnuity.controller;
 
-import com.grampus.commnuity.domain.Board;
+import com.grampus.commnuity.config.auth.UserDetail;
+import com.grampus.commnuity.dto.BoardDto;
 import com.grampus.commnuity.dto.UserJoinDto;
 import com.grampus.commnuity.service.BoardService;
 import com.grampus.commnuity.service.UserService;
+import com.grampus.commnuity.util.Pagination;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 public class UserController {
     private final BoardService boardService;
     private final UserService userService;
+
 
     @GetMapping("/join")
     public String joinPage(Model model){
@@ -62,16 +63,18 @@ public class UserController {
                                  @RequestParam(required = false, defaultValue = "1") int page,
                                  Authentication auth){
 
-        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by("creationDate").descending());
-        Page<Board> myBoardList = boardService.getMyBoardList(auth.getName(), pageRequest);
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+        Long userId = userDetail.getId();
 
-        model.addAttribute("boards", myBoardList.toList());
-        model.addAttribute("currentPage", myBoardList.getNumber());
-        model.addAttribute("totalPage", myBoardList.getTotalPages());
+        int totalBoard = boardService.getTotalMyBoardCount(userId);
+        Pagination pagination = new Pagination(totalBoard, page);
+
+        List<BoardDto> myBoardList = boardService.getMyBoardList(userId, pagination.getStartIdx(), pagination.getPageSize());
+
+        model.addAttribute("boards", myBoardList);
+        model.addAttribute("currentPage", pagination.getPage());
+        model.addAttribute("totalPage", pagination.getTotalPage());
         return "/users/boards";
     }
-
-
-
 
 }
