@@ -31,7 +31,11 @@ public class SecurityConfig  {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf().disable()
-                .cors().and()
+                .cors()
+                .and()
+                .headers()
+                .frameOptions().sameOrigin()
+                .and()
                 // url 별 권한 처리
                 .authorizeRequests()
                 .antMatchers(anonymousUserUrl).anonymous()
