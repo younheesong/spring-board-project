@@ -1,24 +1,22 @@
 package com.grampus.commnuity.controller;
 
 
-import com.grampus.commnuity.domain.Board;
+import com.grampus.commnuity.config.auth.UserDetail;
 import com.grampus.commnuity.domain.Category;
+import com.grampus.commnuity.domain.File;
 import com.grampus.commnuity.dto.BoardCreateDto;
 import com.grampus.commnuity.dto.BoardDto;
+import com.grampus.commnuity.dto.BoardEditDto;
 import com.grampus.commnuity.service.BoardService;
 import com.grampus.commnuity.service.FileService;
 import com.grampus.commnuity.service.LikeService;
+import com.grampus.commnuity.util.Pagination;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +30,8 @@ import java.util.List;
 public class BoardController {
     private final BoardService boardService;
     private final LikeService likeService;
+    private final FileService fileService;
+
 
     /* 게시글 조회(페이징, 키워드 처리) */
     @GetMapping("/{category}")
@@ -44,14 +44,17 @@ public class BoardController {
         log.info("keyword: " + keyword);
 
         Category boardCategory = Category.of(category);
-        PageRequest pageRequest = PageRequest.of(page - 1, 10, Sort.by("creationDate").descending());
-        Page<Board> boardList = boardService.getBoardList(boardCategory, pageRequest, keyword);
+
+        int totalBoard = boardService.getTotalBoardCount(boardCategory, keyword);
+        Pagination pagination = new Pagination(totalBoard, page);
+
+        List<BoardDto> boards = boardService.getBoardList(boardCategory, keyword, pagination.getStartIdx(), pagination.getPageSize());
 
         model.addAttribute("category", boardCategory);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("boards", boardList.toList());
-        model.addAttribute("currentPage", boardList.getNumber());
-        model.addAttribute("totalPage", boardList.getTotalPages());
+        model.addAttribute("boards", boards);
+        model.addAttribute("currentPage", pagination.getPage());
+        model.addAttribute("totalPage", pagination.getTotalPage());
 
         return "boards/list";
     }
@@ -69,9 +72,17 @@ public class BoardController {
 
         model.addAttribute("board", boardDto);
 
+        /* 파일 추가 */
+        List<File> files = fileService.getFiles(boardId);
+        model.addAttribute("files", files);
+
+
         /* 좋아요 체크 여부 확인 로직 */
         if(auth!=null){
-            boolean liked = likeService.isLiked(auth.getName(), boardId);
+            UserDetail userDetail = (UserDetail) auth.getPrincipal();
+            Long userId = userDetail.getId();
+            boolean liked = likeService.isLiked(userId, boardId);
+            log.info("liked: "+liked);
             model.addAttribute("boardLiked", liked);
         }
 
@@ -111,6 +122,7 @@ public class BoardController {
         log.info("boardCreateDto.category: "+boardCreateDto.getCategory());
         log.info("boardCreateDto.title: "+boardCreateDto.getTitle());
         log.info("boardCreateDto.content: "+boardCreateDto.getContent());
+        log.info("boardCreateDTO.files: "+boardCreateDto.getFiles());
         log.info("auth.name: "+auth.getName());
 
         boardService.writeBoard(boardCreateDto, auth.getName());
@@ -125,12 +137,17 @@ public class BoardController {
 
         model.addAttribute("type", "edit");
         model.addAttribute("board", boardDto);
+
+        /* 파일 추가 */
+        List<File> files = fileService.getFiles(boardId);
+        model.addAttribute("files", files);
+
         return "boards/write";
     }
 
     /* 게시글 수정 */
     @PostMapping("/{category}/{boardId}/edit")
-    public String editBoard(@PathVariable Long boardId, @PathVariable String category, BoardDto boardDto) throws IOException {
+    public String editBoard(@PathVariable Long boardId, @PathVariable String category, BoardEditDto boardDto) throws IOException {
         log.info("boardId: "+ boardId);
         log.info("boardDto: "+boardDto);
 
