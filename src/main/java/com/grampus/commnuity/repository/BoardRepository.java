@@ -2,30 +2,45 @@ package com.grampus.commnuity.repository;
 
 import com.grampus.commnuity.domain.Board;
 import com.grampus.commnuity.domain.Category;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import com.grampus.commnuity.dto.BoardDto;
+import com.grampus.commnuity.dto.BoardEditDto;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Mapper
 @Repository
-public interface BoardRepository extends JpaRepository<Board, Long> {
-    /*카테고리 별 페이지 조회*/
-    Page<Board> findAllByCategory(Category category, PageRequest pageRequest);
+public interface BoardRepository {
+    /* board 리스트 조회 */
+    List<BoardDto> getBoardList(@Param("category") Category category, @Param("keyword") String keyword, @Param("start") int start, @Param("pageSize") int pageSize);
 
-    /* 카테고리 별 타이틀이 포함된 검색 결과 페이지 조회*/
-    Page<Board> findAllByCategoryAndTitleContains(Category category, String title, PageRequest pageRequest);
+    /* 자신이 작성한 board 리스트 조회 */
+    List<BoardDto> getMyBoardList(@Param("userId") Long userId, @Param("start") int start, @Param("pageSize") int pageSize);
 
-    /* 해당 유저가 작성한 글 조회 */
-    Page<Board> findAllByUserLoginId(String loginId, PageRequest pageRequest);
+    /* board 리스트 total 수 조회 */
+    int getTotalBoardCount(@Param("category") Category category, @Param("keyword") String keyword);
 
-    /* 조회수 증가 */
-    @Modifying
-    @Query("update Board b set b.viewsCount = b.viewsCount +1 where b.id = :id")
-    int updateViewsCount(@Param("id")Long id);
+    /* 자신이 작성한 board total 수 조회 */
+    int getTotalMyBoardCount(Long userId);
 
+    /* 특정 글 조회 */
+    BoardDto getBoardItemById(Long boardId);
+
+    /* 글생성 */
+    void saveBoard(Board board);
+
+    /* 글 편집 */
+    void updateBoard(BoardEditDto board);
+
+    /* 글 삭제 */
+    void deleteBoard(Long boardId);
+
+    /* 조회수 업데이트 */
+    int updateViewsCount(Long boardId);
+    /*하트 수 증가*/
+    void increaseLikesCount(Long boardId);
+
+    void decreaseLikesCount(Long boardId);
 }
