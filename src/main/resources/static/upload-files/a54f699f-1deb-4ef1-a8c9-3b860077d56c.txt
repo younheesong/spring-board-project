@@ -1,0 +1,75 @@
+service =사용자가 받는 무언가.
+soa = service oriented architecture 
+component가 모여 service가 된다.
+
+
+**vue**
+vuetify - vue의 ui 프레임워크 
+router
+store<-vuex : 상태저장가능
+i18n : 다국어 지원
+
+vue의 구조 
+template / script / style
+export default { //json형태
+//속성설명
+name : 오류날때 표시됨.
+data : 이 컴포넌트에서만 쓸 변수. ()=>{} 형태로
+componets : 이 컴포넌트에서 사용 될 다른 컴포넌트들
+computed: 자동계산기  
+watch:특정변수를 계속 감시-> data 변경시 특정 이벤트 발생
+//생명주기
+created: 맨 처음 시작하는 순간
+mounted: 메모리 올라가고 나서 다시 부착되는 순간?
+destroyed : 인스턴스 소멸직전, 보통 자원 반납, 또는 log출력 또는 경고창 
+methods: 메소드 
+}
+
+scss 
+
+
+경로에서 @이는 절대경로 (src)가 시작
+
+router선언시
+mode: 'history' 필수 
+routes : [
+{
+	path
+	redirect
+	component: ()=>import(), // 레이아웃용
+		children:[{
+			component : //찐 contents
+
+		}]
+
+},
+{},
+]
+router -> name과 url로 둘 중 하나로 설정해서 페이지 이동 가능
+name은 바로 component 실행, url은 router로 가서 거기서 component를 실행
+
+
+데이터바인딩
+ : (=v-bind: 의 약자)
+*vue에서는 상대경로가 안먹힘. 절대경로로 넣어야하는데, 상대경로로 넣고 싶은 경우 :src = "require('@/.../...')"
+ 
+@(=v-on: 의 약자) 
+
+vue for문
+id값 안쓰고 key 사용 // 다른 요소랑 다른 거라고 표시
+
+*만약 id값 쓰고 싶은 경우 ref 사용. 
+사용시, this.$refs.~ // vue에서 ref를 모아서 전역변수로 시켜줌. 
+
+
+부모-자식 component 간의 통신방법 중요
+props 선언 :부모->자식
+emit : 자식 -> 부모
+
+array 는 변이메소드 사용해야 data 변화 감지가능
+
+
+vuex: 상태저장
+
+axios 라이브러리 
+

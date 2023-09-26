@@ -1,6 +1,6 @@
 package com.grampus.commnuity.domain;
 
-public enum Category{
+public enum Category {
         JAVA, SPRING, JAVASCRIPT, REACT;
 
         public static Category of(String category) {
