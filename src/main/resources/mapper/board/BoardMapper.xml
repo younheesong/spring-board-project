@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.grampus.commnuity.repository.BoardRepository">
+
+    <select id="getBoardList" parameterType="hashMap" resultType="com.grampus.commnuity.dto.BoardDto">
+        SELECT BOARD_ID AS ID,
+               LOGIN_ID AS USERLOGINID,
+               USERNAME AS USERNAME,
+               CATEGORY AS CATEGORY,
+               TITLE AS TITLE,
+               CONTENT AS CONTENT,
+               CONTENT_IMAGES AS CONTNETIMAGES,
+               LIKES_COUNT AS LIKESCOUNT,
+               VIEWS_COUNT AS VIEWSCOUNT,
+               CREATION_DATE AS CREATIONDATE,
+               MODIFIED_DATE AS MODIFIEDDATE
+        FROM BOARD B
+                 JOIN USER U
+                      ON B.USER_ID = U.USER_ID
+        WHERE 1=1
+        <if test='category!= null and category.toString() != ""'>
+            AND B.CATEGORY = #{category}
+        </if>
+        <if test='keyword !=null and keyword !=""'>
+            AND B.TITLE like CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY B.CREATION_DATE DESC
+            LIMIT #{start}, #{pageSize};
+    </select>
+
+    <select id="getTotalBoardCount" parameterType="hashMap" resultType="int">
+        SELECT count(*)
+        FROM BOARD
+        WHERE 1=1
+        <if test='category!= null and category.toString() != ""'>
+            AND CATEGORY = #{category}
+        </if>
+        <if test='keyword !=null and keyword !=""'>
+            AND TITLE like CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+
+    <select id="getMyBoardList" parameterType="hashMap" resultType="com.grampus.commnuity.dto.BoardDto">
+        SELECT BOARD_ID AS ID,
+               LOGIN_ID AS USERLOGINID,
+               USERNAME AS USERNAME,
+               CATEGORY AS CATEGORY,
+               TITLE AS TITLE,
+               CONTENT AS CONTENT,
+               CONTENT_IMAGES AS CONTENTIMAGES,
+               LIKES_COUNT AS LIKESCOUNT,
+               VIEWS_COUNT AS VIEWSCOUNT,
+               CREATION_DATE AS CREATIONDATE,
+               MODIFIED_DATE AS MODIFIEDDATE
+        FROM BOARD B
+        JOIN USER U
+            ON B.USER_ID = U.USER_ID
+        WHERE B.USER_ID = #{userId}
+        ORDER BY B.CREATION_DATE DESC
+            LIMIT #{start}, #{pageSize};
+    </select>
+
+
+    <select id="getTotalMyBoardCount" parameterType="long" resultType="int">
+        SELECT count(*)
+        FROM BOARD
+        WHERE USER_ID = #{userId}
+    </select>
+
+
+    <select id="getBoardItemById" parameterType="long" resultType="com.grampus.commnuity.dto.BoardDto">
+        SELECT BOARD_ID AS ID,
+               LOGIN_ID AS USERLOGINID,
+               USERNAME AS USERNAME,
+               CATEGORY AS CATEGORY,
+               TITLE AS TITLE,
+               CONTENT AS CONTENT,
+               CONTENT_IMAGES AS CONTENTIMAGES,
+               LIKES_COUNT AS LIKESCOUNT,
+               VIEWS_COUNT AS VIEWSCOUNT,
+               CREATION_DATE AS CREATIONDATE,
+               MODIFIED_DATE AS MODIFIEDDATE
+        FROM BOARD B
+        JOIN USER U
+        ON B.USER_ID = U.USER_ID
+        WHERE B.board_id = #{boardId};
+    </select>
+
+    <insert id="saveBoard" parameterType="com.grampus.commnuity.domain.Board" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO BOARD
+        (
+            TITLE,
+            CONTENT,
+            CATEGORY,
+            CREATION_DATE,
+            MODIFIED_DATE,
+            LIKES_COUNT,
+            VIEWS_COUNT,
+            USER_ID,
+            CONTENT_IMAGES
+        )
+        VALUES
+            (
+                #{title},
+                #{content},
+                #{category},
+                #{creationDate},
+                #{modifiedDate},
+                #{likesCount},
+                #{viewsCount},
+                #{userId},
+                #{contentImages}
+            )
+    </insert>
+
+    <update id="updateBoard" parameterType="com.grampus.commnuity.dto.BoardEditDto">
+        UPDATE BOARD
+        SET TITLE =#{title}, CONTENT = #{content}, CATEGORY = #{category}, MODIFIED_DATE=now(), CONTENT_IMAGES= #{contentImages}
+        WHERE BOARD_ID = #{id}
+    </update>
+
+    <delete id="deleteBoard" parameterType="Long">
+        DELETE FROM BOARD WHERE BOARD_ID = #{boardId}
+    </delete>
+
+    <update id="updateViewsCount" parameterType="long">
+        UPDATE BOARD
+        SET VIEWS_COUNT = VIEWS_COUNT + 1
+        WHERE BOARD_ID = #{boardId}
+    </update>
+
+
+    <update id="increaseLikesCount" parameterType="long">
+        UPDATE BOARD
+        SET LIKES_COUNT = LIKES_COUNT + 1
+        WHERE BOARD_ID = #{boardId}
+    </update>
+
+    <update id="decreaseLikesCount" parameterType="long">
+        UPDATE BOARD
+        SET LIKES_COUNT = LIKES_COUNT - 1
+        WHERE BOARD_ID = #{boardId}
+    </update>
+</mapper>

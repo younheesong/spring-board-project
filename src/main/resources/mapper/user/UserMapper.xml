@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.grampus.commnuity.repository.UserRepository">
+    <select id="saveUser" parameterType="com.grampus.commnuity.domain.User">
+        INSERT INTO USER (login_id, password, username, role)
+        VALUES (#{loginId}, #{password}, #{username}, #{role});
+    </select>
+
+    <select id="findByLoginId" parameterType="string" resultType="com.grampus.commnuity.domain.User">
+        SELECT USER_ID AS ID,
+               LOGIN_ID AS LOGINID,
+               PASSWORD AS PASSWORD,
+               USERNAME AS USERNAME,
+               ROLE AS ROLE
+        FROM USER
+        WHERE LOGIN_ID = #{loginId};
+    </select>
+
+
+</mapper>

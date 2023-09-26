@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.grampus.commnuity.repository.LikeRepository">
+    <insert id="saveLike" parameterType="com.grampus.commnuity.domain.Like">
+        INSERT INTO LIKES (board_id, user_id)
+        VALUES (#{boardId}, #{userId});
+    </insert>
+
+    <select id="getLikeByUserLoginIdAndBoardId" parameterType="hashMap" resultType="com.grampus.commnuity.domain.Like">
+        SELECT LIKE_ID AS ID,
+               USER_ID AS USERID,
+               BOARD_ID AS BOARDID
+        FROM LIKES
+        WHERE
+            USER_ID = #{userId}
+            AND BOARD_ID = #{boardId}
+    </select>
+
+    <delete id="deleteLike" parameterType="hashMap">
+        DELETE
+        FROM LIKES
+        WHERE
+            USER_ID = #{userId}
+            AND BOARD_ID = #{boardId}
+    </delete>
+
+
+</mapper>

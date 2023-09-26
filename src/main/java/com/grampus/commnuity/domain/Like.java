@@ -3,27 +3,19 @@ package com.grampus.commnuity.domain;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
-@Entity
-@Getter @Setter
+
+@Getter
+@Setter
 @Table(name = "likes")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Like {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="like_id")
     private Long id;
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="user_id")
-    @NotNull
-    private User user;
+    private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="board_id")
-    @NotNull
-    private Board board;
+    private Long boardId;
 
 }

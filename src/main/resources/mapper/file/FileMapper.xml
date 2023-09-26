@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.grampus.commnuity.repository.FileRepository">
+    <select id="getFilesByBoardId" parameterType="Long" resultType="com.grampus.commnuity.domain.File">
+        SELECT FILE_ID AS ID,
+               BOARD_ID AS BOARDID,
+               ORIGINAL_FILE_NAME AS ORIGINALFILENAME,
+               SAVED_FILE_NAME AS SAVEDFILENAME
+        from FILE
+        where BOARD_ID = #{boardId};
+    </select>
+
+    <insert id="saveFile" parameterType="com.grampus.commnuity.domain.File">
+        INSERT INTO FILE
+        (
+            BOARD_ID,
+            SAVED_FILE_NAME,
+            ORIGINAL_FILE_NAME
+        )
+        VALUES
+            (
+                #{boardId},
+                #{savedFileName},
+                #{originalFileName}
+            )
+    </insert>
+
+    <delete id="deleteFile" parameterType="Long">
+        DELETE FROM FILE WHERE FILE_ID = #{fileId}
+    </delete>
+
+
+
+</mapper>

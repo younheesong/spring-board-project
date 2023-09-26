@@ -1,14 +1,18 @@
 package com.grampus.commnuity.repository;
 
 import com.grampus.commnuity.domain.Like;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
+@Mapper
 @Repository
-public interface LikeRepository extends JpaRepository<Like, Long> {
-    void deleteByUserLoginIdAndBoardId(String loginId, Long boardId);
-    Boolean existsByUserLoginIdAndBoardId(String loginId, Long boardId);
-    List<Like> findAllByUserLoginId(String loginId);
+public interface LikeRepository {
+    void saveLike(Like like);
+
+    void deleteLike(@Param("userId") Long userId, @Param("boardId") Long boardId);
+
+    Optional<Like> getLikeByUserLoginIdAndBoardId(@Param("userId") Long userId, @Param("boardId") Long boardId);
 }
