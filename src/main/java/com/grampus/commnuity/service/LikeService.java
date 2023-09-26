@@ -1,48 +1,41 @@
 package com.grampus.commnuity.service;
 
-import com.grampus.commnuity.domain.Board;
 import com.grampus.commnuity.domain.Like;
-import com.grampus.commnuity.domain.User;
-import com.grampus.commnuity.dto.BoardDto;
-import com.grampus.commnuity.repository.BoardRepository;
 import com.grampus.commnuity.repository.LikeRepository;
-import com.grampus.commnuity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LikeService {
     private final LikeRepository likeRepository;
-    private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
+    private final BoardService boardService;
 
     // 좋아요 누르기
     @Transactional
-    public void addLike(String loginId, Long boardId){
-        Board board = boardRepository.findById(boardId).get();
-        User user = userRepository.findByLoginId(loginId).get();
+    public void addLike(Long userId, Long boardId){
+        /* board.viewsCount 증가 */
+        boardService.increaseLikesCount(boardId);
 
-        board.changeLikesCount(board.getLikesCount()+1);
-
-        likeRepository.save(Like.builder().user(user).board(board).build());
+        /* like save */
+        likeRepository.saveLike(Like.builder().userId(userId).boardId(boardId).build());
     }
 
     // 좋아요 삭제하기
     @Transactional
-    public void deleteLike(String loginId, Long boardId){
-        Board board = boardRepository.findById(boardId).get();
+    public void deleteLike(Long loginId, Long boardId){
+        /* board.viewsCount 감소 */
+        boardService.decreaseLikesCount(boardId);
 
-        board.changeLikesCount(board.getLikesCount()-1);
-
-        likeRepository.deleteByUserLoginIdAndBoardId(loginId, boardId);
+        /* like delete */
+        likeRepository.deleteLike(loginId, boardId);
     }
 
     // 좋아요 눌렀는지 확인
-    public boolean isLiked(String loginId, Long boardId){
-        return likeRepository.existsByUserLoginIdAndBoardId(loginId,boardId);
+    public boolean isLiked(Long userId, Long boardId){
+        return likeRepository.getLikeByUserLoginIdAndBoardId(userId, boardId).isPresent();
     }
 }

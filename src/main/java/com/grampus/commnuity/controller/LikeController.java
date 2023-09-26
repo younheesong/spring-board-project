@@ -1,5 +1,6 @@
 package com.grampus.commnuity.controller;
 
+import com.grampus.commnuity.config.auth.UserDetail;
 import com.grampus.commnuity.service.BoardService;
 import com.grampus.commnuity.service.LikeService;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +18,20 @@ public class LikeController {
     @PostMapping ("/{boardId}/add")
     @ResponseStatus(HttpStatus.OK)
     public String addLike(@PathVariable Long boardId, Authentication auth){
-        likeService.addLike(auth.getName(), boardId);
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+        Long userId = userDetail.getId();
+
+        likeService.addLike(userId, boardId);
         return "ok";
     }
 
     @PostMapping("/{boardId}/delete")
     @ResponseStatus(HttpStatus.OK)
     public String deleteLike(@PathVariable Long boardId, Authentication auth) {
-        likeService.deleteLike(auth.getName(), boardId);
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+        Long userId = userDetail.getId();
+
+        likeService.deleteLike(userId, boardId);
         return "ok";
     }
 
