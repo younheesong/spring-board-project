@@ -120,18 +120,131 @@
                 목록
             </button>
         </div>
+
+        <%-- 댓글 --%>
+        <div class="mt-20 col-span-full text-md font-bold">
+            댓글
+        </div>
+        <div class="col-span-full">
+            <div class="flex w-full gap-3">
+                <label class="flex-1">
+                    <input type="text" id="newComment"
+                           class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>
+                </label>
+                <sec:authorize access="isAnonymous()">
+                    <button type="button"
+                            onclick="alert('로그인 해주세요')"
+                            class="rounded-md px-5 py-2 border text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100">
+                        등록
+                    </button>
+                </sec:authorize>
+                <sec:authorize access="isAuthenticated()">
+                    <button type="button"
+                            id="saveCommentButton"
+                            class="rounded-md px-5 py-2 border text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100">
+                        등록
+                    </button>
+                </sec:authorize>
+
+            </div>
+
+            <div id="comment" class="flex flex-col"></div>
+
+            <ul id="paging" class="mt-10"></ul>
+        </div>
     </div>
 </div>
 </body>
 <script>
     let liked = false;
     let likesCount = parseInt(${board.likesCount})
-    window.addEventListener('DOMContentLoaded', function () {
+    let commentCurrentPage = 1;
+    let commentTotalPage = 1;
+    let currentUser = null;
+    window.addEventListener('DOMContentLoaded', async function () {
         if ("${boardLiked}" == 'true') {
             liked = true;
             $("#likeButton").css('fill', 'black');
         }
+        await getCurrentUser();
+
+
+        $("#saveCommentButton").click(function () {
+            createComment()
+        })
+
+        await getCommentList();
     });
+
+    const getCurrentUser = async () => {
+        const resp = await fetch(`http://localhost:8080/users/me`);
+        if (resp.status != 200) {
+            return;
+        }
+        currentUser = await resp.json();
+    }
+
+    const renderPagination = (commentCurrentPage, commentTotalPage) => {
+        let nowPage = commentCurrentPage;    // 현재 페이지
+        let totalPage = commentTotalPage;  // 전체 페이지 수
+        console.log(nowPage, totalPage);
+        let firstPage;  // 화면에 출력될 첫 페이지
+        for (let i = nowPage; i >= 1; i--) {
+            if (i % 5 == 1) {
+                firstPage = i;
+                break;
+            }
+        }
+
+        let lastPage;   // 화면에 출력될 마지막 페이지
+        let nextButton; // 다음 버튼 출력 여부
+        if (firstPage + 4 >= totalPage) {
+            lastPage = totalPage;
+            nextButton = false;
+        } else {
+            lastPage = firstPage + 4;
+            nextButton = true;
+        }
+
+        // HTML 생성
+        let pageHtml = "";
+        pageHtml += "<nav class='flex items-center justify-between border-t border-gray-200 px-4 sm:px-0'>"
+        pageHtml += "<li><a class='" + "pagination page" + 1 +
+            " inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'>" +
+            "&laquo;" +
+            "</a></li>";
+        if (firstPage != 1) {
+            pageHtml += "<li><a class='" + "pagination page" + 1 +
+                " inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'" +
+                ">&lsaquo;</a></li>";
+        }
+        pageHtml += "<div class='-mt-px flex'>"
+
+        for (let i = firstPage; i <= lastPage; i++) {
+            if (i == nowPage) {
+                pageHtml += "<li class='page-item active'><a class='inline-flex items-center border-t-2 border-indigo-500 px-4 pt-4 text-sm font-medium text-indigo-600'>" + i + "</a></li>";
+            } else {
+                pageHtml += "<li class='page-item'><a class='" + "pagination page" + i +
+                    " inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'>" + i + "</a></li>";
+            }
+        }
+        pageHtml += "</div>"
+
+        if (nextButton) {
+            pageHtml += "<li><a class='" + "pagination page" + lastPage + 1 +
+                " inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'>&rsaquo;</a></li>";
+        }
+        pageHtml += "<li><a class='" + "pagination page" + totalPage +
+            " inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'>&raquo;</a></li>";
+        pageHtml += "</nav>"
+
+        $("#paging").html(pageHtml);
+        $('.pagination').click(function () {
+            const page = $(this).attr("class").split("page")[1].charAt(0);
+            getCommentList(Number(page));
+        })
+    }
+
 
     const clickLiked = async () => {
         if (liked) {
@@ -173,5 +286,245 @@
         const category = "${board.category}";
         location.href = '/boards/' + category.toLowerCase();
     }
+
+    /**댓글 처리**/
+    const getCommentList = async (page = 1) => {
+        const resp = await fetch(`http://localhost:8080/comments/${board.id}?page=` + page)
+        const data = await resp.json()
+        console.log(data);
+        commentCurrentPage = data.currentPage;
+        commentTotalPage = data.totalPage;
+
+        renderCommentSection(data.comments);
+        renderPagination(commentCurrentPage, commentTotalPage);
+    }
+
+    const renderCommentSection = (data) => {
+        console.log(data);
+
+
+        let html = '<div>';
+
+        if (data.length == 0) {
+            html += '<div class="mt-6 text-center">등록된 댓글이 없습니다.</div>'
+        } else {
+            $.each(data, (idx, item) => {
+                html += '<div class="mt-6">'
+                if (item.comment.deleted) {
+                    html += '<h4 class="text-lg font-bold">' + item.comment.username + '</h4>';
+                    html += '<div class="mt-1">삭제된 댓글입니다.</div>'
+                } else {
+                    html += '<div class="flex justify-between">';
+                    html += '<div class="flex items-end gap-2">';
+                    html += '<h4 class="text-lg font-bold">' + item.comment.username + '</h4>';
+                    html += '<span class="text-xs mb-1">' + convertUTCToLocalTime(item.comment.modifiedDate) + '</span>';
+                    if (item.comment.modified) {
+                        html += '<span class="text-xs mb-1"> (수정됨)</span>';
+                    }
+                    html += '</div>';
+
+                    html += '<div class="flex gap-1">';
+                    html += '<button class="text-xs" onclick="createReCommentInput(' + item.comment.id + ')">답글</button>'
+                    if (currentUser && currentUser == item.comment.userId) {
+                        html += "<button class='text-xs' onclick='createUpdateCommentInput(" + item.comment.id + ")'>수정</button> "
+                        html += "<button class='text-xs' onclick='deleteComment(" + item.comment.id + ")'>삭제</button>"
+                    }
+                    html += '</div></div>'
+                    html += '<p class="mt-1 break-all" id="commentId' + item.comment.id + '">' + item.comment.comment + '</p>'
+                }
+                html += '</div>'
+
+                // 리댓글 렌더링
+                if (item.reComments.length > 0) {
+                    $.each(item.reComments, (idx, recomment) => {
+                        html += '<div class="ml-10 mt-6">';
+                        if (recomment.deleted) {
+                            html += '<h4 class="text-lg font-bold">' + recomment.username + '</h4> ';
+                            html += '<p class="mt-1"> 삭제된 댓글입니다. </p>';
+                        } else {
+                            html += '<div class="flex justify-between">'
+                            html += '<div class="flex items-end gap-2">';
+                            html += '<h4 class="text-lg font-bold">' + recomment.username + '</h4> ';
+                            html += '<span class="text-xs mb-1">' + convertUTCToLocalTime(recomment.modifiedDate) + '</span>';
+                            if (recomment.modified) {
+                                html += '<span class="text-xs mb-1"> (수정됨)</span>';
+                            }
+                            html += '</div>';
+
+                            if (currentUser && currentUser == recomment.userId) {
+                                html += '<div class="mt-1 text-xs">';
+                                html += '<button onclick="createUpdateCommentInput(' + recomment.id + ')"> 수정 </button> ';
+                                html += '<button onclick="deleteComment(' + recomment.id + ')"> 삭제 </button>';
+                                html += '</div>';
+                            }
+                            html += "</div>"
+                            html += '<p class="mt-1 break-all" id="commentId' + recomment.id + '">' + recomment.comment + '</p>'
+                        }
+                        html += '</div> '
+                    })
+                }
+            })
+
+        }
+        html += '</div>';
+
+        $("#comment").html(html);
+    }
+
+    const createComment = async () => {
+        console.log("create comment")
+        const requestBody = {
+            boardId: ${board.id},
+            comment: $("#newComment").val(),
+            parentCommentId: 0
+        }
+        //fetch
+        const resp = await fetch(`http://localhost:8080/comments/add`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (resp.status == 200) {
+            alert("등록");
+            $("#newComment").val("");
+
+            // 렌더링 처리
+            getCommentList();
+        } else {
+            alert("에러 발생")
+        }
+
+    }
+
+    const deleteComment = async (id) => {
+        console.log("delete: " + id);
+
+        const deleteConfirm = confirm("삭제하시겠습니까?")
+        if (!deleteConfirm) {
+            return; // 취소
+        }
+        // 삭제 진행 fetch
+        const resp = await fetch('http://localhost:8080/comments/' + id + '/delete', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+        if (resp.status != 200) {
+            alert("에러발생")
+        } else {
+            alert('삭제 완료되었습니다.');
+            getCommentList(commentCurrentPage);
+        }
+
+    }
+
+    const createUpdateCommentInput = async (id) => {
+        if ($("#commentInputId" + id).length > 0) {
+            console.log("already exists update input tag");
+            return;
+        }
+        $("#commentId" + id).replaceWith(
+            '<div class="flex gap-3">' +
+            '<input type="text" ' +
+            'class="block flex-1  w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" ' +
+            'id="commentInputId' + id + '" ' +
+            'value="' + $("#commentId" + id).text() +
+            '"/>' +
+            '<button class="rounded-md px-5 py-2 border text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100" ' +
+            'onclick="updateComment(' + id + ')"> 수정 </button>' +
+            '</div>'
+        );
+    }
+    const updateComment = async (id) => {
+        console.log("update: " + id);
+
+        const requestBody = {
+            comment: $("#commentInputId" + id).val()
+        }
+        //fetch
+        const resp = await fetch('http://localhost:8080/comments/' + id + '/update', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody)
+        });
+        if (resp.status != 200) {
+            alert("에러발생")
+        } else {
+            alert('수정되었습니다.')
+            getCommentList(commentCurrentPage);
+        }
+    }
+
+    const createReCommentInput = (parentCommentId) => {
+        if (currentUser == null) {
+            alert("로그인 해주세요");
+            return;
+        }
+
+        if ($("#reCommentInputId" + parentCommentId).length > 0) {
+            console.log("already exists recomment input tag");
+            return;
+        }
+        console.log("parentCommentId : " + parentCommentId);
+
+        const div = document.createElement('div');
+        div.innerHTML += '<div class="ml-10 mt-6 flex gap-3"> <input type="text" ' +
+            'class="flex-1 rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600" ' +
+            'id="reCommentInputId' + parentCommentId + '" ' +
+            'placeholder="답글을 입력하세요"/> ' +
+            '<button class="rounded-md px-5 py-2 border text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100" ' +
+            'onclick="saveReComment(' + parentCommentId + ')"> 등록 </button> </div>';
+
+        $("#commentId" + parentCommentId).after(div);
+    }
+    const saveReComment = async (parentCommentId) => {
+        const requestBody = {
+            boardId: ${board.id},
+            comment: $("#reCommentInputId" + parentCommentId).val(),
+            parentCommentId: parentCommentId
+        }
+        //fetch
+        const resp = await fetch(`http://localhost:8080/comments/add`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (resp.status != 200) {
+            alert("에러 발생")
+        } else {
+            alert("등록");
+            $("#newComment").val("");
+
+            // 렌더링 처리
+            getCommentList();
+        }
+
+    }
+
+    // 시간 포맷팅
+    const convertUTCToLocalTime = (utcTimeStr) => {
+        const utcDate = new Date(utcTimeStr.replace("T", " ") + ' UTC'); // UTC 시간 문자열을 Date 객체로 파싱
+        const parsedDate = new Date(utcDate);
+
+        const year = parsedDate.getFullYear();
+        const month = parsedDate.getMonth() + 1;
+        const day = parsedDate.getDate();
+        const hour = parsedDate.getHours();
+        const minute = parsedDate.getMinutes();
+        return year + "-" + month + "-" + day + " " + hour + ":" + minute;
+    }
+
+
 </script>
+
+
 </html>
