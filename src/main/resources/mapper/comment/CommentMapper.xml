@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.grampus.commnuity.repository.CommentRepository">
+    <select id="getCommentList" parameterType="hashMap" resultType="com.grampus.commnuity.dto.CommentDto">
+        SELECT C.COMMENT_ID AS ID,
+               C.COMMENT AS COMMENT,
+               U.USERNAME AS USERNAME,
+               U.USER_ID AS USERID,
+               C.BOARD_ID AS BOARDID,
+               C.CREATION_DATE AS CREATIONDATE,
+               C.MODIFIED_DATE AS MODIFIEDDATE,
+               C.PARENT_COMMENT_ID AS PARENTCOMMENTID,
+               C.IS_DELETED AS ISDELETED,
+               C.IS_MODIFIED AS ISMODIFIED
+        FROM COMMENT C
+            JOIN USER U
+                ON C.USER_ID = U.USER_ID
+        WHERE
+            C.BOARD_ID = #{boardId}
+            AND C.PARENT_COMMENT_ID = 0
+
+        ORDER BY C.CREATION_DATE DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <select id="getTotalComment" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM COMMENT
+        WHERE
+            BOARD_ID = #{boardId}
+            AND PARENT_COMMENT_ID = 0
+    </select>
+
+    <select id="getReCommentList" parameterType="long" resultType="com.grampus.commnuity.dto.CommentDto" >
+        SELECT C.COMMENT_ID AS ID,
+               C.COMMENT AS COMMENT,
+               U.USERNAME AS USERNAME,
+               U.USER_ID AS USERID,
+               C.BOARD_ID AS BOARDID,
+               C.CREATION_DATE AS CREATIONDATE,
+               C.MODIFIED_DATE AS MODIFIEDDATE,
+               C.PARENT_COMMENT_ID AS PARENTCOMMENTID,
+               C.IS_DELETED AS ISDELETED,
+               C.IS_MODIFIED AS ISMODIFIED
+        FROM COMMENT C
+                 JOIN USER U
+                      ON C.USER_ID = U.USER_ID
+        WHERE C.PARENT_COMMENT_ID = #{parentCommentId}
+        ORDER BY C.CREATION_DATE ASC
+    </select>
+
+    <select id="getComment" parameterType="long" resultType="com.grampus.commnuity.dto.CommentDto" >
+        SELECT C.COMMENT_ID AS ID,
+               C.COMMENT AS COMMENT,
+               U.USERNAME AS USERNAME,
+               U.USER_ID AS USERID,
+               C.BOARD_ID AS BOARDID,
+               C.CREATION_DATE AS CREATIONDATE,
+               C.MODIFIED_DATE AS MODIFIEDDATE,
+               C.PARENT_COMMENT_ID AS PARENTCOMMENTID,
+               C.IS_DELETED AS ISDELETED,
+               C.IS_MODIFIED AS ISMODIFIED
+        FROM COMMENT C
+                 JOIN USER U
+                      ON C.USER_ID = U.USER_ID
+        WHERE C.COMMENT_ID = #{commentId}
+    </select>
+
+    <insert id="saveComment" parameterType="com.grampus.commnuity.domain.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO COMMENT
+        (
+            USER_ID,
+            BOARD_ID,
+            PARENT_COMMENT_ID,
+            COMMENT,
+            CREATION_DATE,
+            MODIFIED_DATE,
+            IS_DELETED,
+            IS_MODIFIED
+        )
+        VALUES
+            (
+                #{userId},
+                #{boardId},
+                #{parentCommentId},
+                #{comment},
+                #{creationDate},
+                #{modifiedDate},
+                #{isDeleted},
+                #{isModified}
+            )
+    </insert>
+
+    <update id="updateComment" parameterType="hashMap">
+        UPDATE COMMENT
+        SET COMMENT = #{comment},
+            MODIFIED_DATE = now(),
+            IS_MODIFIED = true
+        WHERE COMMENT_ID = #{commentId}
+    </update>
+
+    <update id="deleteComment" parameterType="long">
+        UPDATE COMMENT
+        SET IS_DELETED =true
+        WHERE COMMENT_ID = #{commentId}
+    </update>
+
+
+</mapper>
