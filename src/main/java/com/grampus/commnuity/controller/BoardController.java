@@ -157,7 +157,7 @@ public class BoardController {
 
     /* 게시글 삭제 */
     @GetMapping ("/{category}/{boardId}/delete")
-    public String deleteBoard(@PathVariable Long boardId, @PathVariable Category category) throws IOException {
+    public String deleteBoard(@PathVariable Long boardId, @PathVariable Category category){
         log.info("boardId: "+boardId);
 
         boardService.deleteBoard(boardId);

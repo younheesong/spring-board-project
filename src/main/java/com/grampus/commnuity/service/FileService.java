@@ -91,7 +91,7 @@ public class FileService {
 
     // 이미지 삭제
     @Transactional
-    public void deleteFiles(List<File> files) throws IOException {
+    public void deleteFiles(List<File> files) {
         for (File file : files) {
             deleteFile(file);
         }

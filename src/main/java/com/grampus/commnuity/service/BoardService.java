@@ -134,7 +134,7 @@ public class BoardService {
     }
 
     // 글 삭제
-    public Long deleteBoard(Long boardId) throws IOException {
+    public Long deleteBoard(Long boardId)  {
         BoardDto board = boardRepository.getBoardItemById(boardId);
 
         if (board == null) {
